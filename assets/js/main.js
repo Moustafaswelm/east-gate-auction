@@ -218,9 +218,45 @@ async function setupMap(events) {
 			id: circle.attr("data-building"),
 			cx: parseFloat(circle.attr("cx")),
 			cy: parseFloat(circle.attr("cy")),
-			element: this
+			element: this,
+			boundaryPolygon: null // Will be assigned below
 		});
 	});
+
+	// Get building boundary polygons (st8 class)
+	const buildingBoundaries = svg.selectAll("polygon.st8");
+
+	// Helper function to check if a point is inside a polygon
+	function pointInPolygon(x, y, polygon) {
+		const points = polygon.getAttribute("points").trim().split(/\s+/);
+		const vertices = [];
+		for (let i = 0; i < points.length; i += 2) {
+			vertices.push({
+				x: parseFloat(points[i]),
+				y: parseFloat(points[i + 1])
+			});
+		}
+
+		let inside = false;
+		for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
+			const xi = vertices[i].x, yi = vertices[i].y;
+			const xj = vertices[j].x, yj = vertices[j].y;
+
+			if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+				inside = !inside;
+			}
+		}
+		return inside;
+	}
+
+	// Assign boundary polygon to each building by checking which polygon contains the building circle center
+	for (const building of buildings) {
+		buildingBoundaries.each(function () {
+			if (pointInPolygon(building.cx, building.cy, this)) {
+				building.boundaryPolygon = this;
+			}
+		});
+	}
 
 	// Center building number labels (st15 class) within their white circles
 	const buildingNumberTexts = svg.selectAll("text.st15");
@@ -277,29 +313,38 @@ async function setupMap(events) {
 		}
 	});
 
-	// Calculate center point of each unit and assign to nearest building
-	units.each(function (d, i) {
+	// Calculate center point of each unit and assign to building whose boundary contains it
+	units.each(function () {
 		const bbox = this.getBBox();
 		const centerX = bbox.x + bbox.width / 2;
 		const centerY = bbox.y + bbox.height / 2;
 
-		// Find nearest building
-		let nearestBuilding = null;
-		let minDistance = Infinity;
-
+		// First, try to find building whose boundary polygon contains this unit
+		let assignedBuilding = null;
 		for (const building of buildings) {
-			const dx = centerX - building.cx;
-			const dy = centerY - building.cy;
-			const distance = Math.sqrt(dx * dx + dy * dy);
-
-			if (distance < minDistance) {
-				minDistance = distance;
-				nearestBuilding = building.id;
+			if (building.boundaryPolygon && pointInPolygon(centerX, centerY, building.boundaryPolygon)) {
+				assignedBuilding = building.id;
+				break;
 			}
 		}
 
-		if (nearestBuilding) {
-			this.setAttribute("data-building", nearestBuilding);
+		// Fallback to nearest building if no boundary contains the unit
+		if (!assignedBuilding) {
+			let minDistance = Infinity;
+			for (const building of buildings) {
+				const dx = centerX - building.cx;
+				const dy = centerY - building.cy;
+				const distance = Math.sqrt(dx * dx + dy * dy);
+
+				if (distance < minDistance) {
+					minDistance = distance;
+					assignedBuilding = building.id;
+				}
+			}
+		}
+
+		if (assignedBuilding) {
+			this.setAttribute("data-building", assignedBuilding);
 		}
 	});
 
