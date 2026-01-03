@@ -192,19 +192,12 @@ section.side-details {
 }
 
 .currency-icon {
-	height: 1em;
+	height: 0.8em;
 	width: auto;
 }
 
 .value-text {
 	margin: 0;
-	margin-top: 5px;
+	margin-top: 6px;
 }
 
-#meter-price-display-2 .currency-icon {
-	filter: invert(31%) sepia(93%) saturate(1066%) hue-rotate(178deg) brightness(96%) contrast(91%);
-}
-
-#total-display .currency-icon {
-	filter: brightness(0) invert(1);
-}
