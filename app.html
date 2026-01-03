@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مخطط المزاد</title>
+  <link rel="icon" type="image/svg+xml" href="assets/images/compass.svg" />
+  <script src="assets/js/d3@v7.js"></script>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/app.css" />
+</head>
+
+<body dir="rtl">
+  <main>
+    <div class="map-container">
+      <div class="compass-container">
+        <img src="assets/images/compass.svg" alt="compass" />
+      </div>
+    </div>
+    <div class="details-outer">
+      <section class="side-details">
+        <div class="logos-container">
+          <img src="assets/images/nozul-logo.svg" alt="Logo" />
+          <img src="assets/images/logo.svg" alt="Logo" />
+        </div>
+        <div class="details-highlights">
+          <!-- remember to set default value in JS -->
+          <div class="meter-price">
+            <span id="meter-price-display">234</span>
+            <span>ريـال للمتر</span>
+          </div>
+          <div class="madrab-num">
+            <span id="madrab-num-display">234</span>
+            <span>رقم المضرب</span>
+          </div>
+        </div>
+        <div class="details-content">
+          <div class="detail">
+            <span class="detail-label">عدد القطع</span>
+            <span class="detail-value" id="units-count-display">234</span>
+          </div>
+          <div class="detail">
+            <span class="detail-label">الواجهة</span>
+            <span class="detail-value" id="interface-display">234</span>
+          </div>
+          <div class="detail">
+            <span class="detail-label">مساحة القطع</span>
+            <span class="detail-value" id="units-area-display">375</span>
+          </div>
+          <div class="detail detail-price">
+            <span class="detail-label">سعر المتر</span>
+            <span class="detail-value" id="meter-price-display-2">234</span>
+          </div>
+          <div class="detail">
+            <span class="detail-label">قيمة الأرض</span>
+            <span class="detail-value" id="subtotal-display">234</span>
+          </div>
+          <div class="detail">
+            <span class="detail-label">قيمة السعي وضريبته</span>
+            <span class="detail-value" id="tax-display">234</span>
+          </div>
+          <div class="detail detail-total">
+            <span class="detail-label">إجمالي القيمة</span>
+            <span class="detail-value" id="total-display">234</span>
+          </div>
+          <p class="details-note">
+            ملحوظة: المبلغ غير شامل ضريبة التصرفات العقارية
+          </p>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script src="assets/js/main.js"></script>
+  <script>
+
+    const interfaceCaptions = {
+      north: "شمالية",
+      south: "جنوبية",
+      east: "شرقية",
+      west: "غربية",
+    };
+
+    const unitsCountDisplay = document.getElementById("units-count-display");
+    const interfaceDisplay = document.getElementById("interface-display");
+    const madrabNumDisplay = document.getElementById("madrab-num-display");
+    const unitsAreaDisplay = document.getElementById("units-area-display");
+    const meterPriceDisplay2 = document.getElementById("meter-price-display-2");
+    const meterPriceDisplay = document.getElementById("meter-price-display");
+    const subtotalDisplay = document.getElementById("subtotal-display");
+    const taxDisplay = document.getElementById("tax-display");
+    const totalDisplay = document.getElementById("total-display");
+
+    setupMap({
+      values: (data) => {
+        const {
+          interface: interface_,
+          unitsCount,
+          madrabNum,
+          meterPrice,
+          unitArea,
+        } = data;
+
+        const subtotal = unitsCount * unitArea * meterPrice;
+        const tax = (((subtotal * 2.5) / 100) * 115) / 100;
+        const total = subtotal + tax;
+
+        interfaceDisplay.innerText = interfaceCaptions[interface_];
+        unitsCountDisplay.innerText = unitsCount.toLocaleString();
+        madrabNumDisplay.innerText = madrabNum.toLocaleString();
+        unitsAreaDisplay.innerText = (unitArea * unitsCount).toLocaleString();
+        const currencyIcon = '<img src="assets/images/Saudi_Riyal_Symbol-1.png" alt="ريال" class="currency-icon" />';
+        meterPriceDisplay.innerText = meterPrice.toLocaleString();
+        meterPriceDisplay2.innerHTML = `${meterPrice.toLocaleString()} ${currencyIcon}`;
+        subtotalDisplay.innerHTML = `${subtotal.toLocaleString()} ${currencyIcon}`;
+        taxDisplay.innerHTML = `${Number.parseInt(tax.toFixed(0)).toLocaleString()} ${currencyIcon}`;
+        totalDisplay.innerHTML = `${Number.parseInt(total.toFixed(0)).toLocaleString()} ${currencyIcon}`;
+      }
+    });
+  </script>
+</body>
+
+</html>

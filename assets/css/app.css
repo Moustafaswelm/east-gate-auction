@@ -1,0 +1,204 @@
+/* @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap"); */
+
+section.side-details {
+	padding: 1em;
+	display: grid;
+	row-gap: 4em;
+	column-gap: 3em;
+	max-width: 1500px;
+	width: 100%;
+
+	grid-template-areas:
+		"logos logos"
+		"values highlights";
+
+	.logos-container {
+		grid-area: logos;
+		display: flex;
+		justify-content: space-between;
+		gap: 1em;
+
+		img {
+			max-width: 30%;
+			min-width: 200px;
+		}
+	}
+
+	>.details-highlights {
+		grid-area: highlights;
+		display: flex;
+		flex-direction: column;
+		gap: 3em;
+		flex-basis: 40%;
+
+		.meter-price,
+		.madrab-num {
+			gap: 1em;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+
+			span:nth-of-type(2) {
+				font-size: 1.5rem;
+				font-weight: bolder;
+			}
+		}
+
+		.meter-price {
+			span:first-of-type {
+				line-height: 1;
+				padding-top: 0.2em;
+				padding-inline: 0.5em;
+				font-weight: bolder;
+				font-size: 4rem;
+				background-color: #0f3c60;
+				border-radius: 20px;
+				color: white;
+			}
+		}
+
+		.madrab-num {
+			span:first-of-type {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				line-height: 1;
+				padding: 0.5em;
+				padding-top: 0.7em;
+				font-weight: bolder;
+				font-size: 5rem;
+				aspect-ratio: 1 / 1;
+				background-color: #e85e54;
+				border-radius: 100%;
+				color: white;
+			}
+		}
+	}
+
+	>.details-content {
+		grid-area: values;
+		font-size: 1.5rem;
+		font-weight: bolder;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5em;
+		flex: 1;
+
+		.detail {
+			display: grid;
+			grid-template-columns: 2fr 3fr;
+			gap: 0.5em;
+			align-items: center;
+
+			&.detail-price {
+				.detail-value {
+					color: #0970b3;
+					border-color: #0970b3;
+				}
+			}
+
+			&.detail-total {
+				.detail-value {
+					font-size: 2rem;
+					border-color: #48b4b7;
+					background-color: #48b4b7;
+					color: white;
+					margin-inline-end: -30px;
+				}
+			}
+		}
+
+		.detail-value {
+			border: 2px solid #0f3c60;
+			border-radius: 10px;
+			padding: 0.3em;
+			line-height: 1;
+		}
+
+		.details-note {
+			margin: 0;
+			margin-top: 1em;
+			color: #e85e54;
+		}
+	}
+}
+
+@container details (width <=900px) {
+	section.side-details {
+		column-gap: 1em !important;
+
+		.meter-price {
+			span:first-of-type {
+				font-size: 4rem !important;
+			}
+		}
+
+		.madrab-num {
+			span:first-of-type {
+				font-size: 4rem !important;
+			}
+		}
+	}
+}
+
+@container details (width <=600px) {
+	section.side-details {
+		grid-template-areas:
+			"logos"
+			"highlights"
+			"values";
+
+		>.details-highlights {
+			flex-direction: row;
+			gap: 3em;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.meter-price {
+			span:first-of-type {
+				font-size: 3rem !important;
+			}
+		}
+
+		.madrab-num {
+			span:first-of-type {
+				font-size: 3rem !important;
+			}
+		}
+	}
+}
+
+@container details (width >=700px) {
+	section.side-details {
+		padding: 1em;
+	}
+}
+
+@container details (width >=1000px) {
+	section.side-details {
+		padding: 2em;
+	}
+}
+
+@container details (width >=2000px) {
+	section.side-details {
+		padding: 4em;
+		row-gap: 6em !important;
+	}
+}
+
+.currency-icon {
+	height: 1em;
+	width: auto;
+	vertical-align: middle;
+	margin-inline-start: 0.2em;
+}
+
+#meter-price-display-2 .currency-icon {
+	filter: invert(31%) sepia(93%) saturate(1066%) hue-rotate(178deg) brightness(96%) contrast(91%);
+}
+
+#total-display .currency-icon {
+	filter: brightness(0) invert(1);
+}
