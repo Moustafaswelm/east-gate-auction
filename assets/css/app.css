@@ -113,6 +113,9 @@ section.side-details {
 			border-radius: 10px;
 			padding: 0.3em;
 			line-height: 1;
+			display: inline-flex;
+			align-items: center;
+			gap: 0.2em;
 		}
 
 		.details-note {
@@ -191,8 +194,11 @@ section.side-details {
 .currency-icon {
 	height: 1em;
 	width: auto;
-	vertical-align: middle;
-	margin-inline-start: 0.2em;
+}
+
+.value-text {
+	margin: 0;
+	margin-top: 5px;
 }
 
 #meter-price-display-2 .currency-icon {

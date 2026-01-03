@@ -112,10 +112,10 @@
         unitsAreaDisplay.innerText = (unitArea * unitsCount).toLocaleString();
         const currencyIcon = '<img src="assets/images/Saudi_Riyal_Symbol-1.png" alt="ريال" class="currency-icon" />';
         meterPriceDisplay.innerText = meterPrice.toLocaleString();
-        meterPriceDisplay2.innerHTML = `${meterPrice.toLocaleString()} ${currencyIcon}`;
-        subtotalDisplay.innerHTML = `${subtotal.toLocaleString()} ${currencyIcon}`;
-        taxDisplay.innerHTML = `${Number.parseInt(tax.toFixed(0)).toLocaleString()} ${currencyIcon}`;
-        totalDisplay.innerHTML = `${Number.parseInt(total.toFixed(0)).toLocaleString()} ${currencyIcon}`;
+        meterPriceDisplay2.innerHTML = `<p class="value-text">${meterPrice.toLocaleString()}</p> ${currencyIcon}`;
+        subtotalDisplay.innerHTML = `<p class="value-text">${subtotal.toLocaleString()}</p> ${currencyIcon}`;
+        taxDisplay.innerHTML = `<p class="value-text">${Number.parseInt(tax.toFixed(0)).toLocaleString()}</p> ${currencyIcon}`;
+        totalDisplay.innerHTML = `<p class="value-text">${Number.parseInt(total.toFixed(0)).toLocaleString()}</p> ${currencyIcon}`;
       }
     });
   </script>
