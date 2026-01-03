@@ -107,17 +107,20 @@ main {
 
 	.compass-container {
 		position: absolute;
-		top: 1em;
-		left: 1em;
-		width: 100px;
-		aspect-ratio: 1 / 1;
-		background-color: white;
-		border-radius: 100%;
-		overflow: hidden;
-		border: 1px solid rgb(235, 235, 235);
+        top: 1em;
+        left: 1em;
+        width: 100px;
+        aspect-ratio: 1 / 1;
+        background-color: white;
+        border-radius: 100%;
+        overflow: hidden;
+        border: 1px solid rgb(235, 235, 235);
+        justify-content: center;
+        align-items: center;
+        display: flex;
 
 		&>img {
-			width: 100%;
+			width: 73%;
 		}
 	}
 
