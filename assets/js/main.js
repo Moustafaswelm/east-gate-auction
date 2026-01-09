@@ -23,7 +23,7 @@ function saveData(key, value) {
 }
 
 async function importMap() {
-	const svgFile = await d3.xml("assets/images/new-map.svg");
+	const svgFile = await d3.xml("assets/images/new-final-map.svg");
 	const svgNode = document.importNode(svgFile.documentElement, true);
 
 	const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -103,9 +103,9 @@ async function setupMap(events) {
 	const zoom = d3.zoom().scaleExtent([1, 8]).on("zoom", zoomed);
 	const svg = d3.select("#map").call(zoom);
 
-	// Select all yellow units (st0 and st2 both have fill #ffe98f)
+	// Select all yellow units (st0, st2, and st3 all have fill #ffe98f in new map)
 	const units = svg
-		.selectAll(".st0, .st2")
+		.selectAll(".st0, .st2, .st3")
 		.on("click", clicked)
 		.on("dblclick", dblClicked);
 
@@ -134,25 +134,46 @@ async function setupMap(events) {
 		.classed("no-mouse", true)
 		.style("pointer-events", "none");
 
-	// Center unit number labels (st16 class) within their corresponding yellow units
-	const unitNumberTexts = svg.selectAll("text.st16");
-	unitNumberTexts.each(function() {
+
+
+	// Disable pointer events on all non-unit elements that might overlay units
+	// These elements sit on top of units and block clicks
+	svg.selectAll(".st1, .st4, .st5, .st6, .st7, .st8, .st9, .st14, .st15, .st16, .st17, .st18, .st19, .st20, .st21, .st22, .st25, .st26")
+		.style("pointer-events", "none");
+
+	// Helper to get rotation from transform string
+	function getRotation(transform) {
+		const match = transform && transform.match(/rotate\(([^)]+)\)/);
+		return match ? match[1] : null;
+	}
+
+	// Center unit number labels within their corresponding yellow units
+	// We include more classes to catch all potential unit numbers (st5-st11 based on observed classes)
+	const unitNumberTexts = svg.selectAll("text.st5, text.st6, text.st7, text.st8, text.st9, text.st10, text.st11");
+	unitNumberTexts.each(function () {
 		const textEl = d3.select(this);
+		const textContent = textEl.text().trim();
+
+		// Only process if it looks like a number (unit number)
+		// Some street names or other text might share classes
+		if (!/^\d+$/.test(textContent)) return;
 
 		// Parse the transform attribute to get actual position
 		const transform = textEl.attr("transform") || "";
+		// Identify rotation
+		const rotation = getRotation(transform);
+
 		const translateMatch = transform.match(/translate\(([^,\s]+)[,\s]+([^)]+)\)/);
 		if (!translateMatch) return;
 
 		const textX = parseFloat(translateMatch[1]);
 		const textY = parseFloat(translateMatch[2]);
-		const hasRotation = transform.includes("rotate");
 
 		// Find the unit that contains or is nearest to this text
 		let nearestUnit = null;
 		let minDistance = Infinity;
 
-		units.each(function() {
+		units.each(function () {
 			const unitBBox = this.getBBox();
 			const unitCenterX = unitBBox.x + unitBBox.width / 2;
 			const unitCenterY = unitBBox.y + unitBBox.height / 2;
@@ -167,8 +188,8 @@ async function setupMap(events) {
 			}
 		});
 
-		// If we found a nearby unit, center the text in it
-		if (nearestUnit && minDistance < 500) {
+		// If we found a nearby unit (within reasonable distance), center the text in it
+		if (nearestUnit && minDistance < 50) { // Reduced from 500 to 50 to prevent grabbing neighbors
 			const unitBBox = nearestUnit.getBBox();
 			const unitCenterX = unitBBox.x + unitBBox.width / 2;
 			const unitCenterY = unitBBox.y + unitBBox.height / 2;
@@ -177,22 +198,17 @@ async function setupMap(events) {
 			textEl.attr("text-anchor", "middle")
 				.attr("dominant-baseline", "central");
 
-			// Apply new transform with center position (preserve rotation if present)
-			if (hasRotation) {
-				textEl.attr("transform", `translate(${unitCenterX}, ${unitCenterY}) rotate(-90)`);
-			} else {
-				textEl.attr("transform", `translate(${unitCenterX}, ${unitCenterY})`);
+			// Apply new transform with center position (PRESERVING rotation)
+			let newTransform = `translate(${unitCenterX}, ${unitCenterY})`;
+			if (rotation) {
+				newTransform += ` rotate(${rotation})`;
 			}
+			textEl.attr("transform", newTransform);
 
 			// Reset tspan positioning since we're using text-anchor now
 			textEl.select("tspan").attr("x", 0).attr("y", 0);
 		}
 	});
-
-	// Disable pointer events on all non-unit elements that might overlay units
-	// st6 polygons are stroke-only outlines that sit on top of units and block clicks
-	svg.selectAll(".st1, .st3, .st4, .st5, .st6, .st7, .st8, .st9, .st11, .st17, .st18, .st19, .st20")
-		.style("pointer-events", "none");
 
 	// Enable pointer events on units and apply initial state
 	units
@@ -223,12 +239,14 @@ async function setupMap(events) {
 		});
 	});
 
-	// Get building boundary polygons (st8 class)
-	const buildingBoundaries = svg.selectAll("polygon.st8");
+	// Get building boundary polygons (st17 class in new map - these are the actual building block boundaries)
+	const buildingBoundaries = svg.selectAll("polygon.st17");
 
 	// Helper function to check if a point is inside a polygon
 	function pointInPolygon(x, y, polygon) {
-		const points = polygon.getAttribute("points").trim().split(/\s+/);
+		const pointsAttr = polygon.getAttribute("points");
+		if (!pointsAttr) return false; // Skip if no points attribute (e.g., path elements)
+		const points = pointsAttr.trim().split(/\s+/);
 		const vertices = [];
 		for (let i = 0; i < points.length; i += 2) {
 			vertices.push({
@@ -258,25 +276,26 @@ async function setupMap(events) {
 		});
 	}
 
-	// Center building number labels (st15 class) within their white circles
-	const buildingNumberTexts = svg.selectAll("text.st15");
-	buildingNumberTexts.each(function() {
+	// Center building number labels (st12 class in new map) within their white circles
+	const buildingNumberTexts = svg.selectAll("text.st12");
+	buildingNumberTexts.each(function () {
 		const textEl = d3.select(this);
 
 		// Parse the transform attribute to get actual position
 		const transform = textEl.attr("transform") || "";
+		const rotation = getRotation(transform);
+
 		const translateMatch = transform.match(/translate\(([^,\s]+)[,\s]+([^)]+)\)/);
 		if (!translateMatch) return;
 
 		const textX = parseFloat(translateMatch[1]);
 		const textY = parseFloat(translateMatch[2]);
-		const hasRotation = transform.includes("rotate");
 
 		// Find the building circle nearest to this text
 		let nearestCircle = null;
 		let minDistance = Infinity;
 
-		buildingCircles.each(function() {
+		buildingCircles.each(function () {
 			const circle = d3.select(this);
 			const cx = parseFloat(circle.attr("cx"));
 			const cy = parseFloat(circle.attr("cy"));
@@ -301,17 +320,75 @@ async function setupMap(events) {
 			textEl.attr("text-anchor", "middle")
 				.attr("dominant-baseline", "central");
 
-			// Apply new transform with center position (preserve rotation if present)
-			if (hasRotation) {
-				textEl.attr("transform", `translate(${cx}, ${cy}) rotate(-90)`);
-			} else {
-				textEl.attr("transform", `translate(${cx}, ${cy})`);
+			// Apply new transform with center position
+			let newTransform = `translate(${cx}, ${cy})`;
+			if (rotation) {
+				newTransform += ` rotate(${rotation})`;
 			}
+			textEl.attr("transform", newTransform);
 
 			// Reset tspan positioning since we're using text-anchor now
 			textEl.select("tspan").attr("x", 0).attr("y", 0);
 		}
 	});
+
+	// Center service/amenity labels (st13 class) within their corresponding shapes
+	// Potential backgrounds: st16 (green), st21 (brown), st25 (dark blue), st26 (teal)
+	// We select both polygons and paths
+	const servicesBackgrounds = svg.selectAll(".st16, .st21, .st25, .st26");
+	const serviceTexts = svg.selectAll("text.st13");
+
+	serviceTexts.each(function () {
+		const textEl = d3.select(this);
+		// textEl.style("font-family", "TheYearofTheCamel"); // Using CSS instead
+
+		// Parse transform
+		const transform = textEl.attr("transform") || "";
+		const rotation = getRotation(transform);
+		const translateMatch = transform.match(/translate\(([^,\s]+)[,\s]+([^)]+)\)/);
+		if (!translateMatch) return;
+
+		const textX = parseFloat(translateMatch[1]);
+		const textY = parseFloat(translateMatch[2]);
+
+		let nearestShape = null;
+		let minDistance = Infinity;
+
+		servicesBackgrounds.each(function () {
+			const bbox = this.getBBox();
+			const cx = bbox.x + bbox.width / 2;
+			const cy = bbox.y + bbox.height / 2;
+
+			const dx = textX - cx;
+			const dy = textY - cy;
+			const distance = Math.sqrt(dx * dx + dy * dy);
+
+			if (distance < minDistance) {
+				minDistance = distance;
+				nearestShape = this;
+			}
+		});
+
+		// Threshold can be larger here because service buildings are large
+		if (nearestShape && minDistance < 1000) {
+			const bbox = nearestShape.getBBox();
+			const cx = bbox.x + bbox.width / 2;
+			const cy = bbox.y + bbox.height / 2;
+
+			textEl.attr("text-anchor", "middle")
+				.attr("dominant-baseline", "central");
+
+			let newTransform = `translate(${cx}, ${cy})`;
+			if (rotation) {
+				newTransform += ` rotate(${rotation})`;
+			}
+			textEl.attr("transform", newTransform);
+
+			textEl.select("tspan").attr("x", 0).attr("y", 0);
+		}
+	});
+
+
 
 	// Calculate center point of each unit and assign to building whose boundary contains it
 	units.each(function () {

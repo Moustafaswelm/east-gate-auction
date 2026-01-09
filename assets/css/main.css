@@ -70,20 +70,35 @@ body {
 }
 
 /* Ensure map text doesn't inherit the custom font which might throw off positioning */
+/* Ensure map text doesn't inherit the custom font which might throw off positioning */
 .map-container svg text {
-	font-family: sans-serif !important;
-	text-anchor: middle;
-	dominant-baseline: central;
+	/* font-family: sans-serif !important; */
+	/* text-anchor: middle; */
+	/* dominant-baseline: central; */
 	pointer-events: none !important;
-	font-size: 10px;
+	/* font-size: 10px; */
+}
+
+/* Unit number text styling - Unify font size and weight */
+.map-container svg text.st5,
+.map-container svg text.st6,
+.map-container svg text.st7,
+.map-container svg text.st8,
+.map-container svg text.st9,
+.map-container svg text.st10,
+.map-container svg text.st11 {
+	font-size: 5px !important;
+	font-weight: 700 !important;
+	font-family: Tahoma, sans-serif !important;
+	fill: black !important;
 }
 
 /* Building number text styling */
-.map-container svg text.st12 {
+/* .map-container svg text.st12 {
 	fill: #005ce6;
 	font-weight: 700;
 	font-size: 12.93px;
-}
+} */
 
 main {
 	height: 100%;
@@ -107,17 +122,17 @@ main {
 
 	.compass-container {
 		position: absolute;
-        top: 1em;
-        left: 1em;
-        width: 100px;
-        aspect-ratio: 1 / 1;
-        background-color: white;
-        border-radius: 100%;
-        overflow: hidden;
-        border: 1px solid rgb(235, 235, 235);
-        justify-content: center;
-        align-items: center;
-        display: flex;
+		top: 1em;
+		left: 1em;
+		width: 100px;
+		aspect-ratio: 1 / 1;
+		background-color: white;
+		border-radius: 100%;
+		overflow: hidden;
+		border: 1px solid rgb(235, 235, 235);
+		justify-content: center;
+		align-items: center;
+		display: flex;
 
 		&>img {
 			width: 73%;
